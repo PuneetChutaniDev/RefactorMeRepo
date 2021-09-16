@@ -1,0 +1,71 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+<form class="form-inline">
+    <div class="form-group">
+        <label for="sel1" style="margin-right: 15px;font-size:large;color:blue;">Select Currency:</label>
+        <select class="form-control" id="sel1" style="margin-right: 30px;">
+            <option value="default" selected="selected">NONE</option>
+            <option value="usa">USA</option>
+            <option value="euro">EURO</option>
+        </select>
+    </div>
+    <hr style="height:1px;border:none;color:#333;background-color:#333;" />
+</form>
+<div class="container" id="productsList" style="display:none">
+    <h2 style="margin-right: 15px;color:blue;">Products List</h2>
+    <table id="productsTable" class="table table-striped">
+        <thead>
+            <tr class="bg-primary">
+                <th>Type</th>
+                <th>Name</th>
+                <th>Price</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+    </table>
+</div>
+<script>
+    var initialLoad = true;
+    $(document).ready(function () {
+        $("#sel1").change(function () {
+            var value = $('#sel1').val();
+            var currency = "";
+            if (value === "default") {
+                document.getElementById("productsList").style.display = 'none';
+                 return;
+            }
+            if (value === "usa") {
+                value = 0;
+                currency = "$";
+            }
+            else if (value == "euro") {
+                value = 1;
+                currency = "€";
+            }
+
+          $("#tableBody tr").remove();
+          $.ajax({
+              url: "/Home/GetAllProducts",
+              data: {
+                  "currency": value,
+              },
+              type: "GET",
+              success: function (response) {
+                  document.getElementById("productsList").style.display = 'block';
+                  var list = JSON.parse(response.products);
+                  $.each(list, function (i) {
+                      $("#productsTable tbody").append("<tr>" +
+                          "<td>" + list[i].Type + "</td>" +
+                          "<td>" + list[i].Name + "</td>" +
+                          "<td>" + currency + "" + Math.round(list[i].Price) + "</td>" +
+                          "</tr>");
+                  });
+              },
+              error: function (xhr) {
+                  window.alert("Exception occured!")
+              }
+          });
+      });
+    });
+</script>
